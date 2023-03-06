@@ -1,0 +1,8 @@
+
+title: MY Center
+
+app_id: 1
+listen: ":8080"
+database:
+  driver: sqlite3
+  database: mycenter.db

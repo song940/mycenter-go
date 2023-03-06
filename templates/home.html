@@ -1,0 +1,49 @@
+{{template "header" . }}
+
+<h2>Hi, {{.user.Username}}</h2>
+
+<form method="post" action="/posts">
+  <div class="form-field">
+    <textarea class="input" name="content" placeholder="What's on your mind?"></textarea>
+  </div>
+  <div class="form-field">
+    <button class="button button-primary">Post</button>
+  </div>
+</form>
+
+<h2>Timeline</h2>
+<ul>
+  {{range .posts}}
+  <li>
+    <p>{{.Content}}</p>
+    <time>{{.CreatedAt}}</time>
+  </li>
+  {{end}}
+</ul>
+
+<h2>Sessions</h2>
+
+<table class="table" >
+  <thead>
+    <tr>
+      <th>#</th>
+      <th>Name</th>
+      <th>Token</th>
+      <th>Created At</th>
+      <th>Revoke</th>
+    </tr>
+  </thead>
+  <tbody>
+    {{range .sessions}}
+    <tr>
+      <td>{{.Id}}</td>
+      <td>{{.AppName}}</td>
+      <td>{{.Token}}</td>
+      <td>{{.CreatedAt}}</td>
+      <td><a method="delete" href="/logout?id={{.Id}}">revoke</a></td>
+    </tr>
+    {{end}}
+  </tbody>
+</table>
+
+{{template "footer"}}
