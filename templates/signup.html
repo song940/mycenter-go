@@ -1,0 +1,23 @@
+{{template "header"}}
+
+<h2>Signup</h2>
+
+<form method="post" action="/signup">
+  <div class="form-field">
+    <label for="username">username</label>
+    <input class="input" type="text" name="username" required>
+  </div>
+  <div class="form-field">
+    <label for="password">password</label>
+    <input class="input" type="password" name="password" required>
+  </div>
+  <div class="form-field">
+    <label for="code">invite code</label>
+    <input class="input" type="text" name="code" value="{{.code}}" required>
+  </div>
+  <div class="form-field">
+    <button type="submit" class="button button-primary">signup</button>
+  </div>
+</form>
+
+{{template "footer"}}

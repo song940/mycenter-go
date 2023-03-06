@@ -1,0 +1,15 @@
+{{template "header"}}
+
+<h2>Auth</h2>
+
+<form method="post" action="" >
+    <h3>{{.app.Name}}</h3>
+    <p>{{.app.Description}}</p>
+    <a href="{{.app.Homepage}}">{{.app.Homepage}}</a>
+    <div class="form-field">
+        <button type="submit" class="button button-primary" >Allow</button>
+        <a class="button" href="javascript:history.back();">Cancel</a>
+    </div>
+</form>
+
+{{template "footer"}}

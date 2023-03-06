@@ -1,0 +1,14 @@
+{{template "header"}}
+
+<h2>Join</h2>
+<form method="post" action="/join">
+  <div class="form-field">
+    <label for="source">source (email or mobile phone)</label>
+    <input class="input" type="text" name="source" required>
+  </div>
+  <div class="form-field">
+    <button type="submit" class="button button-primary">join</button>
+  </div>
+</form>
+
+{{template "footer"}}

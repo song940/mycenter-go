@@ -1,0 +1,50 @@
+{{template "header"}}
+
+<h2>Create App</h2>
+<form method="post" action="/apps">
+  <div class="form-field">
+    <label for="name">name</label>
+    <input class="input" type="text" name="name" required>
+  </div>
+  <div class="form-field">
+    <label for="description">description</label>
+    <textarea class="input" type="text" name="description" required></textarea>
+  </div>
+  <div class="form-field">
+    <label for="homepage">homepage</label>
+    <input class="input" type="text" name="homepage" required>
+  </div>
+  <div class="form-field">
+    <label for="callback">callback</label>
+    <input class="input" type="text" name="callback" required>
+  </div>
+
+  <div class="form-field">
+    <button type="submit" class="button button-primary">create</button>
+  </div>
+</form>
+
+
+<div>
+  <h2>Apps</h2>
+  <table class="table">
+    <thead>
+      <tr>
+        <th>name</th>
+        <th>secret</th>
+        <th>created_at</th>
+      </tr>
+    </thead>
+    <tbody>
+      {{range .apps}}
+      <tr>
+        <td>{{.Name}}</td>
+        <td>{{.Secret}}</td>
+        <td>{{.CreatedAt}}</td>
+      </tr>
+      {{end}}
+    </tbody>
+  </table>
+</div>
+
+{{template "footer"}}
