@@ -1,0 +1,18 @@
+{{define "page"}}
+
+<h2>Login</h2>
+<form method="post" action="/login">
+  <div class="form-field">
+    <label for="username">username</label>
+    <input class="input" type="text" name="username" required>
+  </div>
+  <div class="form-field">
+    <label for="password">password</label>
+    <input class="input" type="password" name="password" required>
+  </div>
+  <div class="form-field">
+    <button type="submit" class="button button-primary">login</button>
+  </div>
+</form>
+
+{{end}}
