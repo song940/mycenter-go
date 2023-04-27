@@ -1,6 +1,7 @@
 package api
 
 import (
+	"encoding/json"
 	"net/http"
 
 	"github.com/song940/mycenter-go/models"
@@ -30,4 +31,15 @@ func (s *Server) Auth(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	http.Redirect(w, r, app.Callback+"?code="+session.Id, http.StatusFound)
+}
+
+func (s *Server) Token(w http.ResponseWriter, r *http.Request) {
+	clientId := r.URL.Query().Get("client_id")
+	sessionId := r.URL.Query().Get("code")
+	session, err := models.GetSessionByAppId(s.db, clientId, sessionId)
+	if err != nil {
+		s.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	json.NewEncoder(w).Encode(session)
 }

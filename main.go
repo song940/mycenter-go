@@ -1,26 +1,27 @@
 package main
 
 import (
-	"embed"
+	"flag"
 	"net/http"
 
-	_ "github.com/mattn/go-sqlite3"
 	"github.com/song940/mycenter-go/api"
 )
 
-//go:embed templates
-var templatefiles embed.FS
+var (
+	configFile string
+)
 
 func main() {
 
-	server, err := api.NewServer()
-	server.LoadTemplates(templatefiles)
+	flag.StringVar(&configFile, "config", "config.yaml", "config file")
+	flag.Parse()
+
+	config, err := api.LoadConfig(configFile)
 	if err != nil {
 		panic(err)
 	}
-	err = server.Init()
-	if err != nil {
-		panic(err)
-	}
+	server := api.NewServer(config)
+	server.Init()
+	server.LoadTemplates()
 	http.ListenAndServe(":8088", server)
 }

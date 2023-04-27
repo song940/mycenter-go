@@ -3,61 +3,86 @@ package api
 import (
 	"context"
 	"database/sql"
-	"embed"
 	"html/template"
 	"log"
 	"net/http"
+	"os"
 
+	_ "github.com/mattn/go-sqlite3"
 	"github.com/song940/mycenter-go/models"
+	"gopkg.in/yaml.v3"
 )
 
-type Server struct {
-	db       *sql.DB
-	template *template.Template
+type Config struct {
+	Title    string `yaml:"title"`
+	Database struct {
+		Driver   string `yaml:"driver"`
+		Database string `yaml:"database"`
+	} `yaml:"database"`
+}
+
+func LoadConfig(filename string) (config *Config, err error) {
+	config = &Config{}
+	data, err := os.ReadFile(filename)
+	if err != nil {
+		return
+	}
+	err = yaml.Unmarshal(data, &config)
+	return
 }
 
 type H map[string]interface{}
 
+type Server struct {
+	config   *Config
+	db       *sql.DB
+	template *template.Template
+}
+
+func NewServer(config *Config) (server *Server) {
+	server = &Server{config: config}
+	return
+}
+
 func authMiddleware(db *sql.DB, next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		ctx := r.Context()
-		cookie, err := r.Cookie("token")
-		if err == nil {
-			user, _ := models.GetUserByToken(db, cookie.Value)
-			ctx = context.WithValue(ctx, "user", user)
+		token := r.Header.Get("Authorization")
+		if cookie, err := r.Cookie("token"); token == "" && err == nil {
+			token = cookie.Value
 		}
+		user, _ := models.GetUserByToken(db, token)
+		ctx = context.WithValue(ctx, "user", user)
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})
 }
 
 func (server *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	mux := http.NewServeMux()
+	mux.HandleFunc("/", server.Home)
 	mux.HandleFunc("/join", server.Join)
 	mux.HandleFunc("/signup", server.Signup)
 	mux.HandleFunc("/login", server.Login)
 	mux.HandleFunc("/logout", server.Logout)
 	mux.HandleFunc("/posts", server.Timeline)
+	mux.HandleFunc("/user", server.User)
 	mux.HandleFunc("/apps", server.Apps)
 	mux.HandleFunc("/auth", server.Auth)
+	mux.HandleFunc("/token", server.Token)
 	mux.HandleFunc("/settings", server.Settings)
 	mux.HandleFunc("/settings/account", server.Account)
 	mux.HandleFunc("/settings/profile", server.Profile)
-	mux.HandleFunc("/", server.Home)
 	// auth
 	authMux := authMiddleware(server.db, mux)
 	authMux.ServeHTTP(w, r)
 }
 
-func NewServer() (server *Server, err error) {
-	dsn := "mycenter.db"
-	db, err := sql.Open("sqlite3", dsn)
-	server = &Server{db: db}
-	return
-}
-
 func (s *Server) Init() (err error) {
-	// dsn := "file::memory:?cache=shared"
-	_, err = s.db.Exec(`
+	db, err := sql.Open(s.config.Database.Driver, s.config.Database.Database)
+	if err != nil {
+		log.Fatal(err)
+	}
+	_, err = db.Exec(`
 		CREATE TABLE IF NOT EXISTS apps (
 			id INTEGER PRIMARY KEY AUTOINCREMENT,
 			name TEXT NOT NULL,
@@ -71,7 +96,7 @@ func (s *Server) Init() (err error) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	_, err = s.db.Exec(`
+	_, err = db.Exec(`
 		CREATE TABLE IF NOT EXISTS users (
 			id INTEGER PRIMARY KEY AUTOINCREMENT,
 			username TEXT UNIQUE NOT NULL,
@@ -81,7 +106,7 @@ func (s *Server) Init() (err error) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	_, err = s.db.Exec(`
+	_, err = db.Exec(`
 		CREATE TABLE IF NOT EXISTS sessions (
 			id INTEGER PRIMARY KEY AUTOINCREMENT,
 			app_id INTEGER NOT NULL,
@@ -94,7 +119,7 @@ func (s *Server) Init() (err error) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	_, err = s.db.Exec(`
+	_, err = db.Exec(`
 		CREATE TABLE IF NOT EXISTS profile (
 			user_id INTEGER,
 			key     TEXT,
@@ -105,7 +130,7 @@ func (s *Server) Init() (err error) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	_, err = s.db.Exec(`
+	_, err = db.Exec(`
 		CREATE TABLE IF NOT EXISTS invitation (
 			source TEXT NOT NULL,
 			code TEXT NOT NULL,
@@ -115,7 +140,7 @@ func (s *Server) Init() (err error) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	_, err = s.db.Exec(`
+	_, err = db.Exec(`
 		CREATE TABLE IF NOT EXISTS posts (
 			id INTEGER PRIMARY KEY AUTOINCREMENT,
 			user_id INTEGER,
@@ -126,11 +151,11 @@ func (s *Server) Init() (err error) {
 	if err != nil {
 		log.Fatal(err)
 	}
-
+	s.db = db
 	return
 }
 
-func (s *Server) LoadTemplates(templatefiles embed.FS) {
+func (s *Server) LoadTemplates() {
 	s.template = template.Must(template.ParseGlob("templates/*.html"))
 }
 
@@ -187,7 +212,6 @@ func (s *Server) Account(w http.ResponseWriter, r *http.Request) {
 		s.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	// old_password := r.PostFormValue("old_password")
 	new_password := r.PostFormValue("new_password")
 	confirm_password := r.PostFormValue("confirm_password")
 	if new_password != confirm_password {

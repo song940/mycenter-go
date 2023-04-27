@@ -1,0 +1,6 @@
+
+title: MY Center
+
+database:
+  driver: sqlite3
+  database: mycenter.db

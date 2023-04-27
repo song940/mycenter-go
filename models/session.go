@@ -8,12 +8,12 @@ import (
 )
 
 type Session struct {
+	AppName string `json:"-"`
+
 	Id        string    `json:"id"`
 	UserID    int       `json:"user_id"`
 	Token     string    `json:"token"`
 	CreatedAt time.Time `json:"created_at"`
-
-	AppName string `json:"app_name"`
 }
 
 func CreateSession(db *sql.DB, userID int) (session *Session, err error) {
@@ -24,6 +24,26 @@ func CreateSession(db *sql.DB, userID int) (session *Session, err error) {
 		VALUES (1, ?, ?)
 		RETURNING id, user_id, token, created_at
 	`, userID, token).Scan(&session.Id, &session.UserID, &session.Token, &session.CreatedAt)
+	return
+}
+
+func GetSession(db *sql.DB, sessionId string) (session *Session, err error) {
+	session = &Session{}
+	err = db.QueryRow(`
+		SELECT id, user_id, token, created_at 
+		FROM sessions 
+		WHERE id = ?
+	`, sessionId).Scan(&session.Id, &session.UserID, &session.Token, &session.CreatedAt)
+	return
+}
+
+func GetSessionByAppId(db *sql.DB, appId string, sessionId string) (session *Session, err error) {
+	session = &Session{}
+	err = db.QueryRow(`
+		SELECT id, user_id, token, created_at
+		FROM sessions
+		WHERE app_id = ? AND id = ?
+`, appId, sessionId).Scan(&session.Id, &session.UserID, &session.Token, &session.CreatedAt)
 	return
 }
 
@@ -60,8 +80,10 @@ func GetSessions(db *sql.DB, userId int64) (sessions []*Session, err error) {
 }
 
 func GetSessionsWithApp(db *sql.DB, userId int) (sessions []*Session, err error) {
-	sql := `SELECT s.id, a.name, s.token, s.created_at from sessions s, apps a WHERE s.app_id = a.id AND s.user_id = ?`
-	rows, err := db.Query(sql, userId)
+	rows, err := db.Query(`
+		SELECT s.id, a.name, s.token, s.created_at from sessions s, apps a 
+		WHERE s.app_id = a.id AND s.user_id = ?
+	`, userId)
 	if err != nil {
 		return
 	}

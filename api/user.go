@@ -1,6 +1,7 @@
 package api
 
 import (
+	"encoding/json"
 	"log"
 	"net/http"
 	"time"
@@ -114,4 +115,12 @@ func (s *Server) Logout(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 	http.Redirect(w, r, "/", http.StatusFound)
+}
+
+func (s *Server) User(w http.ResponseWriter, r *http.Request) {
+	user, ok := r.Context().Value("user").(*models.User)
+	if !ok {
+		s.Error(w, "user not found", http.StatusInternalServerError)
+	}
+	json.NewEncoder(w).Encode(user)
 }
