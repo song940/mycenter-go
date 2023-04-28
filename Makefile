@@ -1,4 +1,4 @@
-BINARY_NAME=bin/smithy
+BINARY_NAME=bin/mycenter
 
 build:
 	GOARCH=arm64 GOOS=darwin go build -ldflags="-s -w" -o ${BINARY_NAME}-darwin-arm64
