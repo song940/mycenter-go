@@ -117,10 +117,12 @@ func (s *Server) Logout(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, "/", http.StatusFound)
 }
 
-func (s *Server) User(w http.ResponseWriter, r *http.Request) {
+func (s *Server) Users(w http.ResponseWriter, r *http.Request) {
 	user, ok := r.Context().Value("user").(*models.User)
 	if !ok {
-		s.Error(w, "user not found", http.StatusInternalServerError)
+		w.WriteHeader(http.StatusForbidden)
+		w.Write([]byte("user not login"))
+	} else {
+		json.NewEncoder(w).Encode(user)
 	}
-	json.NewEncoder(w).Encode(user)
 }

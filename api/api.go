@@ -51,8 +51,10 @@ func authMiddleware(db *sql.DB, next http.Handler) http.Handler {
 		if cookie, err := r.Cookie("token"); token == "" && err == nil {
 			token = cookie.Value
 		}
-		user, _ := models.GetUserByToken(db, token)
-		ctx = context.WithValue(ctx, "user", user)
+		user, err := models.GetUserByToken(db, token)
+		if err == nil {
+			ctx = context.WithValue(ctx, "user", user)
+		}
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})
 }
@@ -65,7 +67,7 @@ func (server *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	mux.HandleFunc("/login", server.Login)
 	mux.HandleFunc("/logout", server.Logout)
 	mux.HandleFunc("/posts", server.Timeline)
-	mux.HandleFunc("/user", server.User)
+	mux.HandleFunc("/users", server.Users)
 	mux.HandleFunc("/apps", server.Apps)
 	mux.HandleFunc("/auth", server.Auth)
 	mux.HandleFunc("/token", server.Token)
