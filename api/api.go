@@ -14,10 +14,11 @@ import (
 )
 
 type Config struct {
-	AppId    int    `yaml:"app_id"`
-	Address  string `yaml:"listen"`
-	Title    string `yaml:"title"`
-	Database struct {
+	AppId       int    `yaml:"app_id"`
+	Address     string `yaml:"listen"`
+	Title       string `yaml:"title"`
+	Description string `yaml:"description"`
+	Database    struct {
 		Driver   string `yaml:"driver"`
 		Database string `yaml:"database"`
 	} `yaml:"database"`
@@ -166,6 +167,11 @@ func (s *Server) LoadTemplates() {
 
 func (s *Server) Render(w http.ResponseWriter, name string, data H) {
 	w.Header().Add("Content-Type", "text/html")
+	if data == nil {
+		data = H{}
+	}
+	data["Title"] = s.config.Title
+	data["Description"] = s.config.Description
 	if err := s.template.ExecuteTemplate(w, name+".html", data); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
