@@ -26,6 +26,7 @@
 <table class="table" >
   <thead>
     <tr>
+      <th>#</th>
       <th>Name</th>
       <th>Token</th>
       <th>Created At</th>
@@ -35,6 +36,7 @@
   <tbody>
     {{range .sessions}}
     <tr>
+      <td>{{.Id}}</td>
       <td>{{.AppName}}</td>
       <td>{{.Token}}</td>
       <td>{{.CreatedAt}}</td>

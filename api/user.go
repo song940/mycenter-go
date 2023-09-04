@@ -2,7 +2,6 @@ package api
 
 import (
 	"encoding/json"
-	"log"
 	"net/http"
 	"time"
 
@@ -53,17 +52,14 @@ func (s *Server) Signup(w http.ResponseWriter, r *http.Request) {
 		s.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	log.Println(user)
-	http.Redirect(w, r, "/login", http.StatusFound)
+	http.Redirect(w, r, "/login?username="+user.Username, http.StatusFound)
 }
 
 func (s *Server) Login(w http.ResponseWriter, r *http.Request) {
-
 	if r.Method == http.MethodGet {
 		s.Render(w, "login", nil)
 		return
 	}
-
 	if err := r.ParseForm(); err != nil {
 		s.Error(w, err.Error(), http.StatusBadRequest)
 		return
@@ -79,7 +75,7 @@ func (s *Server) Login(w http.ResponseWriter, r *http.Request) {
 		s.Error(w, "Invalid username or password", http.StatusBadRequest)
 		return
 	}
-	session, err := models.CreateSession(s.db, user.Id)
+	session, err := models.CreateSession(s.db, s.config.AppId, user.Id)
 	if err != nil {
 		s.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -120,8 +116,7 @@ func (s *Server) Logout(w http.ResponseWriter, r *http.Request) {
 func (s *Server) Users(w http.ResponseWriter, r *http.Request) {
 	user, ok := r.Context().Value("user").(*models.User)
 	if !ok {
-		w.WriteHeader(http.StatusForbidden)
-		w.Write([]byte("user not login"))
+		s.Error(w, "user not login", http.StatusForbidden)
 	} else {
 		json.NewEncoder(w).Encode(user)
 	}

@@ -16,14 +16,14 @@ type Session struct {
 	CreatedAt time.Time `json:"created_at"`
 }
 
-func CreateSession(db *sql.DB, userID int) (session *Session, err error) {
+func CreateSession(db *sql.DB, appId, userId int) (session *Session, err error) {
 	token := uuid.New().String()
 	session = &Session{}
 	err = db.QueryRow(`
 		INSERT INTO sessions (app_id, user_id, token)
-		VALUES (1, ?, ?)
+		VALUES (?, ?, ?)
 		RETURNING id, user_id, token, created_at
-	`, userID, token).Scan(&session.Id, &session.UserID, &session.Token, &session.CreatedAt)
+	`, appId, userId, token).Scan(&session.Id, &session.UserID, &session.Token, &session.CreatedAt)
 	return
 }
 

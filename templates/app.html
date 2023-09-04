@@ -30,6 +30,7 @@
   <table class="table">
     <thead>
       <tr>
+        <th>#</th>
         <th>name</th>
         <th>secret</th>
         <th>created_at</th>
@@ -38,6 +39,7 @@
     <tbody>
       {{range .apps}}
       <tr>
+        <td>{{.Id}}</td>
         <td>{{.Name}}</td>
         <td>{{.Secret}}</td>
         <td>{{.CreatedAt}}</td>

@@ -14,6 +14,7 @@ import (
 )
 
 type Config struct {
+	AppId    int
 	Title    string `yaml:"title"`
 	Database struct {
 		Driver   string `yaml:"driver"`
@@ -145,6 +146,7 @@ func (s *Server) Init() (err error) {
 	_, err = db.Exec(`
 		CREATE TABLE IF NOT EXISTS posts (
 			id INTEGER PRIMARY KEY AUTOINCREMENT,
+			pid INTEGER UNIQUE NOT NULL,
 			user_id INTEGER,
 			content TEXT,
 			created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
