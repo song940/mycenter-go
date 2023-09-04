@@ -14,7 +14,8 @@ import (
 )
 
 type Config struct {
-	AppId    int
+	AppId    int    `yaml:"app_id"`
+	Address  string `yaml:"listen"`
 	Title    string `yaml:"title"`
 	Database struct {
 		Driver   string `yaml:"driver"`

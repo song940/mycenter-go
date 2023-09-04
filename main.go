@@ -7,12 +7,9 @@ import (
 	"github.com/song940/mycenter-go/api"
 )
 
-var (
-	configFile string
-)
-
 func main() {
 
+	var configFile string
 	flag.StringVar(&configFile, "config", "config.yaml", "config file")
 	flag.Parse()
 
@@ -23,5 +20,5 @@ func main() {
 	server := api.NewServer(config)
 	server.Init()
 	server.LoadTemplates()
-	http.ListenAndServe(":8088", server)
+	http.ListenAndServe(config.Address, server)
 }

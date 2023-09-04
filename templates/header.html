@@ -43,11 +43,14 @@
       </a>
       <nav id="navbar" class="nav nav-bar">
         <a href="/">home</a>
+        {{ if .user }}
+        <a href="/logout">logout</a>
+        {{ else }}
         <a href="/join">join</a>
         <a href="/login">login</a>
-        <a href="/logout">logout</a>
+        {{ end }}
       </nav>
       <hr />
     </header>
     <main class="content">
-      {{ end }}
+{{ end }}
