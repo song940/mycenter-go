@@ -18,7 +18,7 @@ jobs:
     - name: Set up Golang
       uses: actions/setup-go@v3
       with:
-        go-version: v1.20.3
+        go-version: v1.22.0
     - name: Build
       run: make
     - name: Set current date as env variable
@@ -30,4 +30,3 @@ jobs:
         name: release-${{ env.date }}
         files: bin/*
         draft: false
-
